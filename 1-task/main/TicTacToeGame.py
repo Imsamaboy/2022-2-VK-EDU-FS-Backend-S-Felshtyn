@@ -101,11 +101,13 @@ class TicTacToeGame:
                 self.show_board()
                 print("Congratulations! Player ", current_player, " has won the game!")
                 print("\n")
+                break
 
             if self.draw_check():
                 self.show_board()
                 print("Oh! Draw!")
                 print("\n")
+                break
 
             current_player = player_2 if current_player == player_1 else player_1
 

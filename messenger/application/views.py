@@ -19,5 +19,4 @@ def get_homepage(request) -> Union[JsonResponse, HttpResponse]:
     :return:
     """
     logger.debug("Calling get chat lists method...")
-    # template = loader.get_template('messenger/templates/homepage.html')
     return render(request, 'homepage.html')

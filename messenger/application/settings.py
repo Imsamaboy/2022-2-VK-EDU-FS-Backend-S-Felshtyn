@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 import os
-import os
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -45,6 +44,8 @@ INSTALLED_APPS = [
     'application',
     'users'
 ]
+
+AUTH_USER_MODEL = "users.User"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

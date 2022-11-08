@@ -13,6 +13,7 @@ from users.models import User
 logger = logging.getLogger('debug')
 
 
+# TODO: поменять PUT на PATCH (там где я обновляю данные)
 @require_POST
 @csrf_exempt
 def create_chat(request) -> JsonResponse:
@@ -23,12 +24,10 @@ def create_chat(request) -> JsonResponse:
     logger.info("Getting users from db...")
     body = json.loads(request.body)
     user_entities = []
-    user_entity_ids = []
     for user in body.get("users"):
         user_entity = get_object_or_404(User, username=user)
         if user_entity not in user_entities:
             user_entities.append(user_entity)
-            user_entity_ids.append(user_entity.id)
     if len(user_entities) == 1:
         return JsonResponse({"created": False, "message": "Trying to create chat with yourself"}, status=400)
     chat = Chats(chat_name=body.get("name"),
@@ -58,8 +57,7 @@ def update_chat_name(request, chat_id) -> JsonResponse:
     chat.save()
     return JsonResponse({
         "message": f"Chat name was changed from {last_name} to {new_name}"
-    },
-        status=400)
+    }, status=200)
 
 
 @require_http_methods(['PUT'])
@@ -77,7 +75,7 @@ def update_chat_description(request, chat_id) -> JsonResponse:
     chat.save()
     return JsonResponse({
         "message": f"Chat name was changed from {last_description} to {new_description}"
-    }, status=400)
+    }, status=200)
 
 
 @require_http_methods(['PUT'])
@@ -110,7 +108,8 @@ def add_new_member_in_chat(request, chat_id) -> JsonResponse:
     user_id_to_add = json.loads(request.body).get("id")
     chat = get_object_or_404(Chats, id=chat_id)
     user = get_object_or_404(User, id=user_id_to_add)
-    if not list(Chats.objects.filter(users__in=[user_id_to_add])):
+    if not Chats.objects.filter(id=chat_id, users__in=[user_id_to_add]).exists():
+        # TODO: <- тут должен быть какой-то запрос на .value_list(), поменять проверку
         chat.users.add(user)
         chat.save()
         return JsonResponse({
@@ -133,7 +132,7 @@ def delete_member_from_chat(request, chat_id) -> JsonResponse:
     user_id_to_delete = json.loads(request.body).get("id")
     chat = get_object_or_404(Chats, id=chat_id)
     user = get_object_or_404(User, id=user_id_to_delete)
-    if list(Chats.objects.filter(users__in=[user_id_to_delete])):
+    if Chats.objects.filter(id=chat_id, users__in=[user_id_to_delete]).exists():
         chat.users.remove(user)
         chat.save()
         return JsonResponse({
@@ -156,12 +155,11 @@ def delete_chat(request, chat_id) -> JsonResponse:
     """
     logger.info(f"Trying to get chat with id: {chat_id}")
     chat = get_object_or_404(Chats, id=chat_id)
-    if chat:
-        Chats(id=chat_id).delete()
-        logger.info(f"Successfully deleted chat with id: {chat_id}")
-        return JsonResponse({
-            "deleted": True
-        }, status=200)
+    chat.delete()
+    logger.info(f"Successfully deleted chat with id: {chat_id}")
+    return JsonResponse({
+        "deleted": True
+    }, status=200)
 
 
 @require_GET
@@ -172,28 +170,23 @@ def get_chat(request, chat_id) -> JsonResponse:
     :return: JsonResponse
     """
     logger.info(f"Trying to get chat with id: {chat_id}")
-    chat = Chats.objects.get(id=chat_id)
-    if chat:
-        users = list(chat.users.all().values()) if chat else None
-        logger.info(f"Successfully got chat with id: {chat_id}")
-        return JsonResponse({
-            "chat": {
-                "name": chat.chat_name,
-                "description": chat.chat_description
-            },
-            "users": [
-                {
-                    "id": user.get("id"),
-                    "username": user.get("username"),
-                    "description": user.get("description")
-                }
-                for user in users
-            ]},
-            status=200)
-    else:
-        return JsonResponse({
-            "message": "chat wasn't found"
-        }, status=400)
+    chat = get_object_or_404(Chats, id=chat_id)
+    users = list(chat.users.all().values()) if chat else None
+    logger.info(f"Successfully got chat with id: {chat_id}")
+    return JsonResponse({
+        "chat": {
+            "name": chat.chat_name,
+            "description": chat.chat_description
+        },
+        "users": [
+            {
+                "id": user.get("id"),
+                "username": user.get("username"),
+                "description": user.get("description")
+            }
+            for user in users
+        ]},
+        status=200)
 
 
 """-> MESSAGES -> """
@@ -318,7 +311,9 @@ def get_chats_list_by_user_id(request, user_id) -> JsonResponse:
             ]
         }, status=200)
     else:
-        return JsonResponse({}, status=200)
+        return JsonResponse({
+            "message": f"Chats weren't found by user: {user_id}"
+        }, status=400)
 
 
 @require_GET
@@ -344,7 +339,7 @@ def get_all_messages_by_chat_id(request, chat_id) -> JsonResponse:
         }, status=200)
     else:
         return JsonResponse({
-            "message": f"Messages wasn't found. Try to check your chat id: {chat_id}"
+            "message": f"Messages weren't found. Try to check your chat id: {chat_id}"
         }, status=400)
 
 

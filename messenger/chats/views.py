@@ -36,8 +36,8 @@ messages = [
     "ok!"
 ]
 
+
 @require_GET
-@csrf_exempt
 def get_chats_list(request) -> Union[JsonResponse, Response]:
     """
     :param request:
@@ -48,7 +48,6 @@ def get_chats_list(request) -> Union[JsonResponse, Response]:
 
 
 @require_GET
-@csrf_exempt
 def get_chat_page(request, id) -> Union[JsonResponse, Response]:
     """
     :param id:

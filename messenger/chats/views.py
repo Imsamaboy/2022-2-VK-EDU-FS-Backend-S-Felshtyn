@@ -93,7 +93,7 @@ def update_notification_status_in_chat(request, chat_id) -> JsonResponse:
     chat.mute_notifications = status
     chat.save()
     return JsonResponse({
-        "message": f"status was updated from {last_status} to {status}"
+        "message": f"Status was updated from {last_status} to {status}"
     }, status=200)
 
 
@@ -171,7 +171,7 @@ def get_chat(request, chat_id) -> JsonResponse:
     """
     logger.info(f"Trying to get chat with id: {chat_id}")
     chat = get_object_or_404(Chats, id=chat_id)
-    users = list(chat.users.all().values()) if chat else None
+    users = list(chat.users.all().values()) if chat else []
     logger.info(f"Successfully got chat with id: {chat_id}")
     return JsonResponse({
         "chat": {
@@ -184,7 +184,7 @@ def get_chat(request, chat_id) -> JsonResponse:
                 "username": user.get("username"),
                 "description": user.get("description")
             }
-            for user in users
+            for user in users if users
         ]},
         status=200)
 

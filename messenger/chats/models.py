@@ -1,5 +1,3 @@
-import datetime
-
 from django.db import models
 
 from users.models import User
@@ -23,6 +21,16 @@ class Chats(models.Model):
 
     chat_description = models.TextField(verbose_name="Описание",
                                         null=False)
+
+    creator = models.ForeignKey(User,
+                                null=True,
+                                on_delete=models.SET_NULL,
+                                related_name="creator_chat_user",
+                                verbose_name="Создатель чата")
+
+    admins = models.ManyToManyField(User,
+                                    related_name='admin_chat_user',
+                                    verbose_name="Админы")
 
     def __str__(self):
         return f"""

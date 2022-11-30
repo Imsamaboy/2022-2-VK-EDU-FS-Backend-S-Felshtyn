@@ -1,20 +1,28 @@
+
+
 {% extends 'base.html' %}
 {% block title %} Sign in {% endblock %}
 {% block content %}
 
-<div class="row">
-    <div class="row">
-        <div class="col-md-8 mx-auto social-container my-2 order-md-1">
-            <button class="btn btn-primary mb-2">
-                <a style="color: white" href="{% url 'social:begin' 'google-oauth2' %}">Login With Google</a>
-            </button>
-            <button class="btn btn-danger mb-2">
-                <a href="#">Login with Instagram</a>
-            </button>
-            <button class="btn btn-info mb-2">
-                <a href="#">Login with LinkedIn</a>
-            </button>
-        </div>
-    </div>
-    </div>
+<div class="container" id="container">
+	<form method="POST">
+		<h1>Sign in</h1>
+		<div class="social-container">
+			<a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.GET.next }}" class="social">
+				<i class="fab fa-google-plus-g"></i>
+			</a>
+		</div>
+		<span>or use your account</span>
+		{% csrf_token %}
+		{% for field in login_form %}
+    		{{ field }}
+		{% endfor %}
+		{% if error %}
+			<div class="error-msg">{{ error }}</div>
+		{% endif %}
+		<a href="#">Forgot your password?</a>
+		<button>Sign In</button>
+	</form>
+</div>
+
 {% endblock %}

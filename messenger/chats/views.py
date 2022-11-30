@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from chats.models import Chats, Message
@@ -34,6 +33,3 @@ class MessageDeleteEditView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Message.objects.all()
     permission_classes = [IsAuthenticated]
 
-
-def login(request):
-    return render(request, 'login.html')

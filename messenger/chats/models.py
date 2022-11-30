@@ -28,10 +28,6 @@ class Chats(models.Model):
                                 related_name="creator_chat_user",
                                 verbose_name="Создатель чата")
 
-    admins = models.ManyToManyField(User,
-                                    related_name='admin_chat_user',
-                                    verbose_name="Админы")
-
     def __str__(self):
         return f"""
         id: {self.id}, 

@@ -1,6 +1,9 @@
-from django.views.decorators.http import require_GET
-from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
+from rest_framework import generics
+
+from users.models import User
+from users.serializers import UserSerializer
 
 
-# Create your views here.
+class UserAPIView(generics.RetrieveAPIView):
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
